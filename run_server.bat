@@ -1,0 +1,6 @@
+@echo off
+echo Starting Pipe Selector Local Web Server...
+echo Opening Web Browser at http://localhost:8000 ...
+start "" "http://localhost:8000"
+"C:\Users\ANDREW10\AppData\Local\Programs\Python\Python313\python.exe" -m http.server 8000
+pause

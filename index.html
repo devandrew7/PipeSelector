@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piping Material & Size Selector | Process Design Tool</title>
+    <meta name="description" content="Advanced engineering tool to select piping materials, sizes, and schedule wall thicknesses according to ASME B31.3 and chemical compatibility charts.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <div class="logo-icon">P</div>
+            <div class="logo-text">
+                <h1>PIPE SELECTOR</h1>
+                <p>Process Design Engineering Tool</p>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 1rem">
+            <!-- New Button to open Full Compatibility Spreadsheet -->
+            <button id="open-sheet-btn" class="btn-primary" style="background: rgba(59, 130, 246, 0.15); border: 1px solid var(--border-color); box-shadow: none">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                Compatibility Sheet View
+            </button>
+            <div class="header-meta">
+                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                <span>ASME B31.3 Compliant</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Sidebar: Input Parameters -->
+        <section class="sidebar">
+            <div class="card">
+                <h2 class="card-title">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    Fluid Service
+                </h2>
+                <div class="form-group autocomplete-container">
+                    <label for="fluid-search">Select Chemical Fluid</label>
+                    <div style="position: relative; display: flex; align-items: center">
+                        <input type="text" id="fluid-search" placeholder="Type or click to choose fluid..." autocomplete="off" style="padding-right: 2.5rem">
+                        <!-- Dropdown Arrow Icon -->
+                        <span id="dropdown-arrow" style="position: absolute; right: 10px; cursor: pointer; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; height: 100%">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                        </span>
+                    </div>
+                    <div id="fluid-dropdown" class="autocomplete-dropdown"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                    Design Conditions
+                </h2>
+                
+                <div class="form-group">
+                    <label for="pressure-input">Design Pressure</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="pressure-input" value="10" step="any" min="0">
+                        <select id="pressure-unit" class="unit-select">
+                            <option value="bar">bar</option>
+                            <option value="psi">psi</option>
+                            <option value="MPa">MPa</option>
+                            <option value="kgcm2">kg/cm²</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="temp-input">Design Temperature</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="temp-input" value="20" step="any">
+                        <select id="temp-unit" class="unit-select">
+                            <option value="C">°C</option>
+                            <option value="F">°F</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="corrosion-input">Corrosion Allowance (mm)</label>
+                    <input type="number" id="corrosion-input" value="1.5" min="0" max="10" step="0.1">
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Hydraulic Conditions
+                </h2>
+                
+                <div class="form-group">
+                    <label for="flow-input">Volumetric Flow Rate</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="flow-input" value="100" min="0" step="any">
+                        <select id="flow-unit" class="unit-select">
+                            <option value="m3h">m³/h</option>
+                            <option value="gpm">gpm</option>
+                            <option value="m3s">m³/s</option>
+                            <option value="lmin">L/min</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="velocity-input">Target Velocity</label>
+                    <div class="input-with-unit">
+                        <input type="number" id="velocity-input" value="2.0" min="0.1" step="0.1">
+                        <select id="velocity-unit" class="unit-select">
+                            <option value="ms">m/s</option>
+                            <option value="fts">ft/s</option>
+                        </select>
+                    </div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.35rem; line-height: 1.2;">
+                        Typical guides: Liquids: 1.5 - 2.5 m/s | Gases: 15 - 30 m/s
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Display Content Area -->
+        <section class="main-content">
+            <!-- Fluid Selection Placeholder (No Data State) -->
+            <div id="no-fluid-state" class="card nodata-state">
+                <svg width="64" height="64" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <h2>No Fluid Service Selected</h2>
+                <p style="max-width: 400px; margin-top: 0.5rem">Please choose a chemical fluid in the sidebar to load the chemical compatibility matrix and calculate sizing specifications.</p>
+            </div>
+
+            <!-- Active Dashboard View -->
+            <div id="active-dashboard" style="display: none; grid-template-rows: auto 1fr; gap: 1.5rem; height: 100%">
+                <!-- Stat Cards -->
+                <div class="quick-stats">
+                    <div id="card-mat-wrapper" class="stat-card">
+                        <div class="stat-label">Recommended Material</div>
+                        <div id="stat-mat" class="stat-value">—</div>
+                    </div>
+                    <div id="card-size-wrapper" class="stat-card">
+                        <div class="stat-label">Recommended Size</div>
+                        <div id="stat-size" class="stat-value">—</div>
+                    </div>
+                    <div id="card-thick-wrapper" class="stat-card">
+                        <div class="stat-label">Recommended Schedule</div>
+                        <div id="stat-thick" class="stat-value">—</div>
+                    </div>
+                    <div id="card-vel-wrapper" class="stat-card">
+                        <div class="stat-label">Actual Velocity</div>
+                        <div id="stat-vel" class="stat-value">—</div>
+                    </div>
+                </div>
+
+                <!-- Dashboard calculations & visualizer -->
+                <div class="results-container">
+                    <!-- Left: Calculations Panel -->
+                    <div class="calculations-panel">
+                        <div class="tabs">
+                            <button class="tab-btn active" data-tab="sizing-tab">Sizing & Thickness Options</button>
+                            <button class="tab-btn" data-tab="compat-tab">Chemical Compatibility</button>
+                            <button class="tab-btn" data-tab="standards-tab">Standards & Code Specs</button>
+                        </div>
+
+                        <!-- Tab 1: Sizing List -->
+                        <div id="sizing-tab" class="tab-content active card">
+                            <h3 class="card-title" style="margin-bottom: 0.5rem">Top Sizing Solutions</h3>
+                            <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom: 1.25rem">
+                                Select a row to update the SVG drawing and detailed design report on the right.
+                            </p>
+                            <div style="overflow-x: auto">
+                                <table class="report-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Size (NPS)</th>
+                                            <th>Thickness</th>
+                                            <th>ID (Inner)</th>
+                                            <th>Material Spec</th>
+                                            <th>Actual Vel.</th>
+                                            <th>MAWP</th>
+                                            <th>Design Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sizing-list-body">
+                                        <!-- Dynamic Content -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: Compatibility Matrix -->
+                        <div id="compat-tab" class="tab-content card">
+                            <h3 class="card-title" style="margin-bottom: 1.25rem">Fluid Compatibility Matrix</h3>
+                            <div class="matrix-container">
+                                <!-- Metals -->
+                                <div class="matrix-card">
+                                    <div class="matrix-header">Metallic Component Ratings</div>
+                                    <table class="report-table" style="font-size: 0.8rem">
+                                        <thead>
+                                            <tr>
+                                                <th>Material</th>
+                                                <th>Rating</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="compat-list-body">
+                                            <!-- Dynamic Content -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- Elastics -->
+                                <div class="matrix-card">
+                                    <div class="matrix-header">Elastic Component Ratings (Seals/Gaskets)</div>
+                                    <table class="report-table" style="font-size: 0.8rem">
+                                        <thead>
+                                            <tr>
+                                                <th>Elastomer</th>
+                                                <th>Rating</th>
+                                                <th>Suitability</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="elastic-list-body">
+                                            <!-- Dynamic Content -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- Legend -->
+                            <div class="compat-legend-container">
+                                <span class="compat-legend-title">Ratings Guide:</span>
+                                <div class="compat-legend-item">
+                                    <span class="badge badge-a">A</span>
+                                    <span class="compat-legend-desc"><strong>Excellent</strong>: Perfect compatibility. Safe for continuous service.</span>
+                                </div>
+                                <div class="compat-legend-item">
+                                    <span class="badge badge-b">B</span>
+                                    <span class="compat-legend-desc"><strong>Good</strong>: Minor corrosion/attack. Fully acceptable for standard use.</span>
+                                </div>
+                                <div class="compat-legend-item">
+                                    <span class="badge badge-c">C</span>
+                                    <span class="compat-legend-desc"><strong>Fair (Regular)</strong>: Moderate attack. Suitable for non-critical/short-term services.</span>
+                                </div>
+                                <div class="compat-legend-item">
+                                    <span class="badge badge-d">D</span>
+                                    <span class="compat-legend-desc"><strong>Not Recommended</strong>: Severe corrosion or failure. Do not select.</span>
+                                </div>
+                                <div class="compat-legend-item">
+                                    <span class="badge badge-e">E</span>
+                                    <span class="compat-legend-desc"><strong>No Data</strong>: Not tested / info not available.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 3: About Standards -->
+                        <div id="standards-tab" class="tab-content card">
+                            <h3 class="card-title">Engineering Calculations & Standards</h3>
+                            <div style="font-size: 0.88rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 1rem">
+                                <p>
+                                    This sizing and selection engine performs code compliance checks using standard international regulations:
+                                </p>
+                                <ul>
+                                    <li style="margin-left: 1.2rem; margin-bottom: 0.4rem">
+                                        <strong>ASME B31.3 Process Piping:</strong> The pressure design wall thickness is calculated using the straight pipe formula:
+                                        <div style="font-family: var(--font-mono); background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 6px; margin: 0.4rem 0">
+                                            t = (P * D) / (2 * (S*E + P*Y))
+                                        </div>
+                                        Where:
+                                        <br>- P = Design gauge pressure
+                                        <br>- D = Outside diameter (ASTM B36.10/19)
+                                        <br>- S = Material allowable stress at temperature (ASME B31.3 Table A-1)
+                                        <br>- E = Quality factor (1.0 for seamless pipe)
+                                        <br>- Y = Material coefficient (0.4 for steels)
+                                    </li>
+                                    <li style="margin-left: 1.2rem; margin-bottom: 0.4rem">
+                                        <strong>Manufacturing Mill Tolerance:</strong> Standard steel pipe is manufactured to a -12.5% wall thickness tolerance. The nominal design thickness includes this factor:
+                                        <div style="font-family: var(--font-mono); background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 6px; margin: 0.4rem 0">
+                                            t_nom = (t_design + corrosion) / 0.875
+                                        </div>
+                                    </li>
+                                    <li style="margin-left: 1.2rem; margin-bottom: 0.4rem">
+                                        <strong>Chemical Compatibility:</strong> Compatibility data is cross-referenced dynamically from industrial compatibility database of metallic components and elastic seals.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Visualizer & Specs Report -->
+                    <div class="visualizer-card">
+                        <h3 class="card-title">Pipe Section visualizer</h3>
+                        
+                        <div class="svg-container">
+                            <svg id="svg-draw-area" viewBox="0 0 300 300" width="100%" height="100%">
+                                <!-- Rendered dynamically by script -->
+                            </svg>
+                        </div>
+                        
+                        <div class="visual-legend">
+                            <div class="legend-item"><span class="legend-color od"></span> Outside Dia (OD)</div>
+                            <div class="legend-item"><span class="legend-color id"></span> Inside Dia (ID)</div>
+                            <div class="legend-item"><span class="legend-color thickness"></span> Wall Steel</div>
+                            <div class="legend-item"><span class="legend-color corrosion" style="border: 1px dashed var(--danger); background:none"></span> Corrosion Bnd.</div>
+                        </div>
+                        
+                        <div id="details-content" style="width: 100%; margin-top: 1.5rem">
+                            <!-- Dynamic Content -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Full-screen Spreadsheet Overlay Page -->
+    <div id="compatibility-sheet-view" class="sheet-overlay">
+        <div class="sheet-modal">
+            <div class="sheet-header">
+                <div style="display: flex; align-items: center; gap: 0.75rem">
+                    <div class="logo-icon" style="width:32px; height:32px; font-size:1rem">S</div>
+                    <h2>Fluid Compatibility Database Sheet</h2>
+                </div>
+                <div style="display: flex; align-items: center; gap: 1rem">
+                    <!-- Search inside sheet -->
+                    <input type="text" id="sheet-search-input" placeholder="Search fluid..." style="width: 250px; background: rgba(17,24,39,0.9)">
+                    
+                    <!-- Download button -->
+                    <a href="fluid_compatibility_matrix.xlsx" download class="btn-primary" style="background: var(--success); font-size: 0.8rem; padding: 0.5rem 1rem">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Download Excel
+                    </a>
+                    
+                    <!-- Close button -->
+                    <button id="close-sheet-btn" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.5rem; display: flex; align-items: center">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Prominent Ratings Legend inside modal -->
+            <div class="compat-legend-container" style="margin: 0.75rem 1.5rem; width: auto">
+                <span class="compat-legend-title">Ratings Guide:</span>
+                <div class="compat-legend-item">
+                    <span class="badge badge-a">A</span>
+                    <span class="compat-legend-desc"><strong>Excellent</strong>: Perfect compatibility.</span>
+                </div>
+                <div class="compat-legend-item">
+                    <span class="badge badge-b">B</span>
+                    <span class="compat-legend-desc"><strong>Good</strong>: Minor corrosion.</span>
+                </div>
+                <div class="compat-legend-item">
+                    <span class="badge badge-c">C</span>
+                    <span class="compat-legend-desc"><strong>Fair</strong>: Moderate attack. Use with caution.</span>
+                </div>
+                <div class="compat-legend-item">
+                    <span class="badge badge-d">D</span>
+                    <span class="compat-legend-desc"><strong>Not Recommended</strong>: Severe attack / Do not use.</span>
+                </div>
+                <div class="compat-legend-item">
+                    <span class="badge badge-e">E</span>
+                    <span class="compat-legend-desc"><strong>No Data</strong>: Not tested.</span>
+                </div>
+            </div>
+            
+            <div class="sheet-table-container">
+                <table id="full-compatibility-sheet-table">
+                    <thead>
+                        <tr id="sheet-thead-row">
+                            <!-- Dynamic Columns -->
+                        </tr>
+                    </thead>
+                    <tbody id="sheet-tbody">
+                        <!-- Dynamic Rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load compiled data and controller -->
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
